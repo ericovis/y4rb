@@ -11,59 +11,6 @@ import watchfiles
 from y4rb.config import Config
 from y4rb.renderer import render
 
-_RELOAD_SCRIPT = """\
-<script>
-(function () {
-  var es = new EventSource('/events');
-  es.onmessage = function () { location.reload(); };
-})();
-</script>
-"""
-
-_PAGED_HEAD = """\
-<script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
-<style data-pagedjs-ignore>
-    body {
-        margin: 0;
-        padding: 0;
-    }
-    @media screen {
-        body {
-            background-color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-        }
-        .pagedjs_sheet {
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            background-color: #fff;
-            border: 1px solid #ddd;
-        }
-        .pagedjs_page {
-            margin: 1cm 0;
-        }
-    }
-    @media print {
-        body {
-            background-color: #fff
-        }
-    }
-</style>
-"""
-
-
-def _inject_reload(html: str) -> str:
-    tag = "</body>"
-    if tag in html:
-        return html.replace(tag, _RELOAD_SCRIPT + tag)
-    return html + _RELOAD_SCRIPT
-
-
-def _inject_paged(html: str) -> str:
-    tag = "</head>"
-    if tag in html:
-        return html.replace(tag, _PAGED_HEAD + tag)
-    return html
-
 
 class ResumeServer:
     def __init__(self, config: Config) -> None:
@@ -74,10 +21,13 @@ class ResumeServer:
         self._rebuild()
 
     def _rebuild(self) -> None:
-        html = render(self.config.resume, self.config.template, style=self.config.style)
-        if self.config.preview:
-            html = _inject_paged(html)
-        self._html = _inject_reload(html)
+        self._html = render(
+            self.config.resume,
+            self.config.template,
+            style=self.config.style,
+            preview=self.config.preview,
+            reload=True,
+        )
 
     def _broadcast(self) -> None:
         with self._lock:
