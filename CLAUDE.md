@@ -4,6 +4,10 @@ This is a simple resumé builder that uses HTML, CSS and YAML to generate resum�
 ## Project Structure
 
 ```
+bin/
+  run          — Wrapper: uv run <args>
+  y4rb         — Wrapper: uv run main.py <args>
+  test         — Wrapper: uv run pytest -vvv
 y4rb/
   cli.py       — Typer CLI entry point; exposes the `preview` command
   config.py    — Config resolution: reads y4rb.yaml and locates resume/template/style files
@@ -31,15 +35,21 @@ y4rb.yaml      — Project config pointing to resume/, template, and style paths
 
 ## Tools
 
-This repo uses `uv` for package and project management. Always use `uv run` to execute any tool or script — never call `python`, `ruff`, `ty`, `pytest`, or other project tools directly.
+This repo uses `uv` for package and project management. Convenience scripts in `bin/` wrap `uv run` — always prefer these over calling tools directly.
+
+| Script | What it does |
+|--------|--------------|
+| `./bin/run <args>` | Runs `uv run <args>` — use this as the base runner |
+| `./bin/y4rb <args>` | Runs `main.py` (e.g. `./bin/y4rb preview`) |
+| `./bin/test` | Runs `pytest -vvv` |
 
 Examples:
-- Run the app: `uv run python main.py`
-- Preview resume: `uv run python main.py preview` (or `uv run y4rb preview`)
-- Lint: `uv run ruff check .`
-- Format: `uv run ruff format .`
-- Type check: `uv run ty check`
-- Tests: `uv run pytest`
+- Run the app: `./bin/run python main.py`
+- Preview resume: `./bin/y4rb preview`
+- Lint: `./bin/run ruff check .`
+- Format: `./bin/run ruff format .`
+- Type check: `./bin/run ty check`
+- Tests: `./bin/test`
 
 
 ## Key Dependencies
@@ -56,6 +66,6 @@ Examples:
 ## Code Verification Loop
 
 Before considering any task complete, run in order:
-1. `uv run ruff check .` — must pass with no errors
-2. `uv run ty check` — must pass with no errors
-3. `uv run pytest` — all tests must pass
+1. `./bin/run ruff check .` — must pass with no errors
+2. `./bin/run ty check` — must pass with no errors
+3. `./bin/test` — all tests must pass
