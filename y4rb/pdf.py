@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -9,6 +10,14 @@ from playwright.sync_api import BrowserType, sync_playwright
 
 from y4rb.config import Config
 from y4rb.renderer import render as render_html
+
+# When running as a PyInstaller binary the extraction temp dir changes every
+# launch, so browsers installed there are immediately lost. Pin them to a
+# stable user-owned directory instead.
+if getattr(sys, "frozen", False):
+    os.environ.setdefault(
+        "PLAYWRIGHT_BROWSERS_PATH", str(Path.home() / ".y4rb" / "browsers")
+    )
 
 
 def render_pdf(cfg: Config, output: Path) -> None:
@@ -35,7 +44,13 @@ def render_pdf(cfg: Config, output: Path) -> None:
 def _ensure_chromium(chromium: BrowserType) -> None:
     if not Path(chromium.executable_path).exists():
         print("Chromium not found, installing via Playwright...")
-        subprocess.run(
-            [sys.executable, "-m", "playwright", "install", "chromium"],
-            check=True,
-        )
+        if getattr(sys, "frozen", False):
+            from playwright._impl._driver import compute_driver_executable
+
+            driver_executable, driver_cli = compute_driver_executable()
+            subprocess.run([str(driver_executable), driver_cli, "install", "chromium"], check=True)
+        else:
+            subprocess.run(
+                [sys.executable, "-m", "playwright", "install", "chromium"],
+                check=True,
+            )

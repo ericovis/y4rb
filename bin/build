@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./bin/run pyinstaller y4rb.spec --noconfirm
