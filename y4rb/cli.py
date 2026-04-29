@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from importlib.resources import files
 from pathlib import Path
 
 import typer
@@ -8,6 +9,21 @@ from y4rb.config import resolve_config
 from y4rb.server import ResumeServer
 
 app = typer.Typer(no_args_is_help=True)
+
+_DEFAULTS = files("y4rb") / "defaults"
+_DEFAULT_FILES = ("resume.yml", "template.html", "style.css")
+
+
+@app.command()
+def init() -> None:
+    """Initialize a new resume project in the current directory."""
+    for name in _DEFAULT_FILES:
+        dest = Path(name)
+        if dest.exists():
+            typer.echo(f"Skipping {name} (already exists)")
+            continue
+        dest.write_bytes((_DEFAULTS / name).read_bytes())
+        typer.echo(f"Created {name}")
 
 
 @app.command()

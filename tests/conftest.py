@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-_FIXTURE_DIR = Path(__file__).parent.parent / "resume"
+_FIXTURE_DIR = Path(__file__).parent.parent / "y4rb" / "defaults"
 
 
 @pytest.fixture
