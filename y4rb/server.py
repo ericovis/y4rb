@@ -20,12 +20,49 @@ _RELOAD_SCRIPT = """\
 </script>
 """
 
+_PAGED_HEAD = """\
+<script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+<style data-pagedjs-ignore>
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    @media screen {
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+        }
+        .pagedjs_sheet {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        .pagedjs_page {
+            margin: 1cm 0;
+        }
+    }
+    @media print {
+        body {
+            background-color: #fff
+        }
+    }
+</style>
+"""
+
 
 def _inject_reload(html: str) -> str:
     tag = "</body>"
     if tag in html:
         return html.replace(tag, _RELOAD_SCRIPT + tag)
     return html + _RELOAD_SCRIPT
+
+
+def _inject_paged(html: str) -> str:
+    tag = "</head>"
+    if tag in html:
+        return html.replace(tag, _PAGED_HEAD + tag)
+    return html
 
 
 class ResumeServer:
@@ -37,7 +74,10 @@ class ResumeServer:
         self._rebuild()
 
     def _rebuild(self) -> None:
-        self._html = _inject_reload(render(self.config.resume, self.config.template))
+        html = render(self.config.resume, self.config.template, style=self.config.style)
+        if self.config.preview:
+            html = _inject_paged(html)
+        self._html = _inject_reload(html)
 
     def _broadcast(self) -> None:
         with self._lock:
@@ -72,8 +112,6 @@ class ResumeServer:
             def do_GET(self) -> None:
                 if self.path == "/":
                     outer._serve_index(self)
-                elif self.path in ("/style.css", "style.css"):
-                    outer._serve_css(self)
                 elif self.path == "/events":
                     outer._serve_events(self)
                 else:
@@ -88,17 +126,6 @@ class ResumeServer:
         body = self._html.encode("utf-8")
         h.send_response(200)
         h.send_header("Content-Type", "text/html; charset=utf-8")
-        h.send_header("Content-Length", str(len(body)))
-        h.end_headers()
-        h.wfile.write(body)
-
-    def _serve_css(self, h: BaseHTTPRequestHandler) -> None:
-        if self.config.style is None:
-            h.send_error(404)
-            return
-        body = self.config.style.read_bytes()
-        h.send_response(200)
-        h.send_header("Content-Type", "text/css; charset=utf-8")
         h.send_header("Content-Length", str(len(body)))
         h.end_headers()
         h.wfile.write(body)

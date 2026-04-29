@@ -11,6 +11,7 @@ class Config(BaseModel):
     resume: Path
     template: Path
     style: Path | None = None
+    preview: bool = True
 
 
 def resolve_config(config_path: Path | None = None) -> Config:
@@ -27,8 +28,9 @@ def resolve_config(config_path: Path | None = None) -> Config:
         "template file",
     )
     style = _optional(raw.get("style"), ["style.css"])
+    preview = bool(raw.get("preview", True))
 
-    return Config(resume=resume, template=template, style=style)
+    return Config(resume=resume, template=template, style=style, preview=preview)
 
 
 def _load_raw_config(config_path: Path | None) -> dict[str, Any]:

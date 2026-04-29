@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ resume.name }} — Resumé</title>
   {% if style %}
-  <link rel="stylesheet" href="{{ style }}" />
+  <style>{{ style | safe }}</style>
   {% endif %}
 </head>
 <body>

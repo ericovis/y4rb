@@ -56,3 +56,16 @@ def test_config_style_missing_returns_none(config_dir: Path) -> None:
     )
     cfg = resolve_config()
     assert cfg.style is None
+
+
+def test_preview_defaults_to_true(config_dir: Path) -> None:
+    cfg = resolve_config()
+    assert cfg.preview is True
+
+
+def test_preview_can_be_disabled(config_dir: Path) -> None:
+    (config_dir / "y4rb.yaml").write_text(
+        "resume: resume.yml\ntemplate: template.html\npreview: false\n"
+    )
+    cfg = resolve_config()
+    assert cfg.preview is False

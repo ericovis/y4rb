@@ -9,10 +9,6 @@ body {
   font-size: 14px;
   line-height: 1.5;
   color: #1a1a1a;
-  background: #fff;
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 0 40px 60px;
 }
 
 /* Header */
@@ -131,10 +127,11 @@ section h2 {
   color: #444;
 }
 
-@media print {
-  body {
-    margin: 0;
-    padding: 20mm 20mm 20mm;
-    max-width: none;
-  }
+@page {
+    size: A4;
+    margin: 1cm;
+}
+
+@page:first {
+    margin-top: 2cm;
 }
