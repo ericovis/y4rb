@@ -1,0 +1,140 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Georgia", serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #fff;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 40px 60px;
+}
+
+/* Header */
+header {
+  border-bottom: 2px solid #1a1a1a;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+header .title {
+  font-size: 1rem;
+  color: #555;
+  margin-top: 2px;
+}
+
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.contact a {
+  color: #444;
+  text-decoration: none;
+}
+
+.contact a:hover {
+  text-decoration: underline;
+}
+
+/* Sections */
+section {
+  margin-bottom: 24px;
+}
+
+section h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #555;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+  margin-bottom: 14px;
+}
+
+/* Summary */
+.summary p {
+  color: #333;
+}
+
+/* Experience & Education entries */
+.entry {
+  margin-bottom: 16px;
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.entry-header .role {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.entry-header .dates {
+  font-size: 0.82rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.entry-meta {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.entry ul {
+  padding-left: 18px;
+  color: #333;
+}
+
+.entry ul li {
+  margin-bottom: 3px;
+}
+
+/* Skills */
+.skills-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+}
+
+.skills-grid dt {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #333;
+  white-space: nowrap;
+}
+
+.skills-grid dd {
+  font-size: 0.85rem;
+  color: #444;
+}
+
+@media print {
+  body {
+    margin: 0;
+    padding: 20mm 20mm 20mm;
+    max-width: none;
+  }
+}

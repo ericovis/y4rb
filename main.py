@@ -1,6 +1,4 @@
-def main():
-    print("Hello from y4rb!")
-
+from y4rb.cli import app
 
 if __name__ == "__main__":
-    main()
+    app()

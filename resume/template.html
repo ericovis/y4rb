@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ resume.name }} — Resumé</title>
+  {% if style %}
+  <link rel="stylesheet" href="{{ style }}" />
+  {% endif %}
+</head>
+<body>
+
+<header>
+  <h1>{{ resume.name }}</h1>
+  <div class="title">{{ resume.title }}</div>
+  <div class="contact">
+    {% if resume.email %}<span>{{ resume.email }}</span>{% endif %}
+    {% if resume.phone %}<span>{{ resume.phone }}</span>{% endif %}
+    {% if resume.location %}<span>{{ resume.location }}</span>{% endif %}
+    {% for link in resume.links | default([]) %}
+    <a href="{{ link.url }}">{{ link.label }}</a>
+    {% endfor %}
+  </div>
+</header>
+
+{% if resume.summary %}
+<section class="summary">
+  <h2>Summary</h2>
+  <p>{{ resume.summary }}</p>
+</section>
+{% endif %}
+
+{% if resume.experience %}
+<section>
+  <h2>Experience</h2>
+  {% for job in resume.experience %}
+  <div class="entry">
+    <div class="entry-header">
+      <span class="role">{{ job.title }}</span>
+      <span class="dates">{{ job.start }} – {{ job.end }}</span>
+    </div>
+    <div class="entry-meta">{{ job.company }}{% if job.location %} &middot; {{ job.location }}{% endif %}</div>
+    {% if job.highlights %}
+    <ul>
+      {% for item in job.highlights %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if resume.education %}
+<section>
+  <h2>Education</h2>
+  {% for edu in resume.education %}
+  <div class="entry">
+    <div class="entry-header">
+      <span class="role">{{ edu.degree }}</span>
+      <span class="dates">{{ edu.start }} – {{ edu.end }}</span>
+    </div>
+    <div class="entry-meta">{{ edu.institution }}</div>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% if resume.skills %}
+<section>
+  <h2>Skills</h2>
+  <dl class="skills-grid">
+    {% for category, items in resume.skills.items() %}
+    <dt>{{ category }}</dt>
+    <dd>{{ items }}</dd>
+    {% endfor %}
+  </dl>
+</section>
+{% endif %}
+
+</body>
+</html>

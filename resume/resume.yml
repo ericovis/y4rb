@@ -1,0 +1,57 @@
+name: Joseph Klimber
+title: Senior Software Engineer
+email: jane.doe@example.com
+phone: "+1 (555) 123-4567"
+location: San Francisco, CA
+links:
+  - label: github.com/janedoe
+    url: https://github.com/janedoe
+  - label: linkedin.com/in/janedoe
+    url: https://linkedin.com/in/janedoe
+
+summary: >
+  Software engineer with 8 years of experience building scalable backend systems
+  and developer tooling. Passionate about clean APIs, observability, and making
+  complex infrastructure approachable for product teams.
+
+experience:
+  - company: Acme Corp
+    title: Senior Software Engineer
+    location: San Francisco, CA
+    start: Jan 2021
+    end: Present
+    highlights:
+      - Redesigned the data ingestion pipeline, reducing P99 latency from 4 s to 180 ms.
+      - Led a team of 4 engineers to migrate 60+ microservices from ECS to Kubernetes.
+      - Introduced structured logging and distributed tracing, cutting MTTR by 40%.
+
+  - company: BuildFast Inc
+    title: Software Engineer
+    location: New York, NY
+    start: Mar 2018
+    end: Dec 2020
+    highlights:
+      - Built a self-serve analytics dashboard used by 200+ enterprise customers.
+      - Implemented a feature-flag system that enabled zero-downtime A/B testing.
+      - Reduced CI build times by 60% through test parallelization and caching.
+
+  - company: Startup Labs
+    title: Junior Software Engineer
+    location: Remote
+    start: Jun 2016
+    end: Feb 2018
+    highlights:
+      - Developed REST APIs consumed by iOS and Android clients.
+      - Wrote integration tests that caught three critical regressions before launch.
+
+education:
+  - institution: University of California, Berkeley
+    degree: B.S. Computer Science
+    start: 2012
+    end: 2016
+
+skills:
+  Languages: Python, Go, TypeScript, SQL
+  Frameworks: FastAPI, Django, Echo, React
+  Infrastructure: Kubernetes, Terraform, AWS, GCP
+  Observability: Prometheus, Grafana, OpenTelemetry, Datadog
