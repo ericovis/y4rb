@@ -5,7 +5,7 @@ This is a simple resumé builder that uses HTML, CSS and YAML to generate resum�
 
 ```
 y4rb/
-  cli.py       — Typer CLI entry point; exposes the `serve` command
+  cli.py       — Typer CLI entry point; exposes the `preview` command
   config.py    — Config resolution: reads y4rb.yaml and locates resume/template/style files
   renderer.py  — Jinja2 rendering: loads YAML data and renders the HTML template
   server.py    — Dev server with live-reload via SSE (watchfiles watches resume/template/style)
@@ -26,7 +26,7 @@ y4rb.yaml      — Project config pointing to resume/, template, and style paths
 - **Config** (`y4rb/config.py`): reads `y4rb.yaml` (or `y4rb.yml`) from CWD, or falls back to default filenames (`resume.yaml`/`resume.yml`, `template.html`/`template.j2.html`, `style.css`). Returns a `Config(resume, template, style)` Pydantic model.
 - **Renderer** (`y4rb/renderer.py`): loads YAML with PyYAML, renders via Jinja2 with `autoescape` enabled. Template receives the entire YAML document as `resume`.
 - **Server** (`y4rb/server.py`): stdlib `ThreadingHTTPServer`, serves `/` (HTML), `/style.css`, and `/events` (SSE). A background thread uses `watchfiles` to watch the resume/template/style files and broadcasts `reload` events to connected clients.
-- **CLI** (`y4rb/cli.py`): single `serve` command via Typer. Options: `--config/-c`, `--port/-p` (default 8080), `--host` (default 127.0.0.1).
+- **CLI** (`y4rb/cli.py`): single `preview` command via Typer. Options: `--config/-c`, `--port/-p` (default 8080), `--host` (default 127.0.0.1).
 
 
 ## Tools
@@ -35,7 +35,7 @@ This repo uses `uv` for package and project management. Always use `uv run` to e
 
 Examples:
 - Run the app: `uv run python main.py`
-- Serve resume: `uv run python main.py serve` (or `uv run y4rb serve`)
+- Preview resume: `uv run python main.py preview` (or `uv run y4rb preview`)
 - Lint: `uv run ruff check .`
 - Format: `uv run ruff format .`
 - Type check: `uv run ty check`
