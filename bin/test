@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./bin/run pytest -vvv
+./bin/run pytest -vvv --cov=y4rb --cov-report=term-missing

@@ -19,9 +19,16 @@ y4rb = "y4rb.cli:app"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
+[tool.coverage.run]
+source = ["y4rb"]
+
+[tool.coverage.report]
+show_missing = true
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
     "ruff>=0.15.12",
     "ty>=0.0.33",
 ]

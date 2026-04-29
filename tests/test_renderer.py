@@ -5,7 +5,7 @@ from y4rb.renderer import render
 
 def test_renders_name_and_title(resume_file: Path, template_file: Path) -> None:
     html = render(resume_file, template_file)
-    assert "Joseph Klimber" in html
+    assert "Jane Doe" in html
     assert "Senior Software Engineer" in html
 
 
@@ -46,4 +46,4 @@ def test_extends_base_with_head_block(resume_file: Path, tmp_path: Path) -> None
     html = render(resume_file, template)
     assert "<!DOCTYPE html>" in html
     assert "fonts.googleapis.com" in html
-    assert "Joseph Klimber" in html
+    assert "Jane Doe" in html
