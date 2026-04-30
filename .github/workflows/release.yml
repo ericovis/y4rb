@@ -42,7 +42,7 @@ jobs:
             artifact_name: y4rb-macos-arm64
             dist_binary: dist/y4rb
 
-          - os: macos-13
+          - os: macos-latest
             spec: specs/macos-intel.spec
             artifact_name: y4rb-macos-x86_64
             dist_binary: dist/y4rb
@@ -71,7 +71,7 @@ jobs:
 
       - name: Build binary
         shell: bash
-        run: uv run pyinstaller ${{ matrix.spec }} --noconfirm
+        run: ./bin/build ${{ matrix.spec }}
 
       - name: Rename binary
         shell: bash

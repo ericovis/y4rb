@@ -2,28 +2,34 @@
 
 set -e
 
-OS=$(uname -s)
-ARCH=$(uname -m)
+if [ -n "$1" ]; then
+  SPEC="$1"
+  echo "Building using $SPEC"
+else
+  OS=$(uname -s)
+  ARCH=$(uname -m)
 
-case "$OS" in
-  Darwin)
-    case "$ARCH" in
-      arm64)   SPEC="specs/macos-arm.spec" ;;
-      x86_64)  SPEC="specs/macos-intel.spec" ;;
-      *)       echo "Unknown macOS architecture: $ARCH"; exit 1 ;;
-    esac
-    ;;
-  Linux)
-    SPEC="specs/linux.spec"
-    ;;
-  MINGW*|MSYS*|CYGWIN*)
-    SPEC="specs/windows.spec"
-    ;;
-  *)
-    echo "Unknown OS: $OS"
-    exit 1
-    ;;
-esac
+  case "$OS" in
+    Darwin)
+      case "$ARCH" in
+        arm64)   SPEC="specs/macos-arm.spec" ;;
+        x86_64)  SPEC="specs/macos-intel.spec" ;;
+        *)       echo "Unknown macOS architecture: $ARCH"; exit 1 ;;
+      esac
+      ;;
+    Linux)
+      SPEC="specs/linux.spec"
+      ;;
+    MINGW*|MSYS*|CYGWIN*)
+      SPEC="specs/windows.spec"
+      ;;
+    *)
+      echo "Unknown OS: $OS"
+      exit 1
+      ;;
+  esac
 
-echo "Building for $OS/$ARCH using $SPEC"
+  echo "Building for $OS/$ARCH using $SPEC"
+fi
+
 ./bin/run pyinstaller "$SPEC" --noconfirm
