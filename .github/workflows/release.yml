@@ -42,11 +42,6 @@ jobs:
             artifact_name: y4rb-macos-arm64
             dist_binary: dist/y4rb
 
-          - os: macos-latest
-            spec: specs/macos-intel.spec
-            artifact_name: y4rb-macos-x86_64
-            dist_binary: dist/y4rb
-
           - os: windows-latest
             spec: specs/windows.spec
             artifact_name: y4rb-windows-x86_64.exe
