@@ -1,13 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
 
+_root = os.path.abspath(os.path.join(SPECPATH, '..'))
 
 a = Analysis(
-    ['main.py'],
-    pathex=[],
+    [os.path.join(_root, 'main.py')],
+    pathex=[_root],
     binaries=[],
     datas=[
-        ('y4rb/defaults', 'y4rb/defaults'),
-        ('y4rb/templates', 'y4rb/templates'),
+        (os.path.join(_root, 'y4rb/defaults'), 'y4rb/defaults'),
+        (os.path.join(_root, 'y4rb/templates'), 'y4rb/templates'),
     ],
     hiddenimports=[],
     hookspath=[],
@@ -29,13 +31,13 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
-    target_arch=None,
+    target_arch='arm64',
     codesign_identity=None,
     entitlements_file=None,
 )
