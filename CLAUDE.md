@@ -97,4 +97,5 @@ Examples:
 Before considering any task complete, run in order:
 1. `./bin/run ruff check .` — must pass with no errors
 2. `./bin/run ty check` — must pass with no errors
-3. `./bin/test` — all tests must pass
+3. `./bin/run bandit -r y4rb/` — must pass with no high-severity findings
+4. `./bin/test` — all tests must pass

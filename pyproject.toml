@@ -27,6 +27,7 @@ show_missing = true
 
 [dependency-groups]
 dev = [
+    "bandit>=1.9.4",
     "pyinstaller>=6.20.0",
     "pytest>=9.0.3",
     "pytest-cov>=7.1.0",
