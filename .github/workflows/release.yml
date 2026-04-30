@@ -139,9 +139,13 @@ jobs:
   docs:
     needs: create-release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: astral-sh/setup-uv@v6
         with:
@@ -150,49 +154,10 @@ jobs:
       - name: Install docs dependencies
         run: uv sync --group docs
 
-      - name: Build docs
-        run: uv run mkdocs build --site-dir site/
-
-      - name: Deploy to S3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-          S3_BUCKET: ${{ secrets.S3_DOCS_BUCKET }}
+      - name: Deploy to GitHub Pages
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           VERSION="${GITHUB_REF_NAME#v}"
-
-          # Upload versioned copy
-          aws s3 sync site/ "s3://$S3_BUCKET/$VERSION/" --delete
-
-          # Update latest alias
-          aws s3 sync site/ "s3://$S3_BUCKET/latest/" --delete
-
-          # Download current versions.json or seed an empty one
-          aws s3 cp "s3://$S3_BUCKET/versions.json" versions.json 2>/dev/null || echo "[]" > versions.json
-
-          # Prepend new version, move "latest" alias to it
-          python3 - "$VERSION" <<'EOF'
-          import json, sys
-
-          version = sys.argv[1]
-          with open("versions.json") as f:
-              versions = json.load(f)
-
-          for v in versions:
-              v["aliases"] = [a for a in v.get("aliases", []) if a != "latest"]
-
-          versions.insert(0, {"version": version, "title": version, "aliases": ["latest"]})
-
-          with open("versions.json", "w") as f:
-              json.dump(versions, f, indent=2)
-          EOF
-
-          aws s3 cp versions.json "s3://$S3_BUCKET/versions.json"
-
-          # Root redirect to /latest/
-          cat > index.html << 'HTML'
-          <!DOCTYPE html>
-          <html><head><meta http-equiv="refresh" content="0;url=latest/"></head></html>
-          HTML
-          aws s3 cp index.html "s3://$S3_BUCKET/index.html"
+          uv run mike deploy --push --update-aliases "$VERSION" latest
+          uv run mike set-default --push latest
