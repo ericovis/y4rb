@@ -25,7 +25,7 @@ class ResumeServer:
             self.config.resume,
             self.config.template,
             style=self.config.style,
-            preview=self.config.preview,
+            preview=True,
             reload=True,
         )
 

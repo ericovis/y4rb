@@ -42,6 +42,17 @@ def test_preview_accepts_custom_host(config_dir: Path) -> None:
     mock_cls.return_value.run.assert_called_once_with("0.0.0.0", 8080)
 
 
+def test_preview_resume_flag(config_dir: Path) -> None:
+    tailored = config_dir / "tailored"
+    tailored.mkdir()
+    variant = tailored / "acme.yml"
+    variant.write_bytes((config_dir / "resume.yml").read_bytes())
+    with patch("y4rb.cli.ResumeServer") as mock_cls:
+        mock_cls.return_value.run = MagicMock()
+        result = runner.invoke(app, ["preview", "--resume", str(variant)])
+    assert result.exit_code == 0
+
+
 def test_render_exits_1_when_resume_missing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["render"])
@@ -64,6 +75,18 @@ def test_render_uses_default_output_name(config_dir: Path) -> None:
     assert result.exit_code == 0
     args = mock_pdf.call_args
     assert args[0][1].name == "resume.pdf"
+
+
+def test_render_resume_flag(config_dir: Path, tmp_path: Path) -> None:
+    tailored = config_dir / "tailored"
+    tailored.mkdir()
+    variant = tailored / "acme.yml"
+    variant.write_bytes((config_dir / "resume.yml").read_bytes())
+    output = tmp_path / "acme.pdf"
+    with patch("y4rb.pdf.render_pdf") as mock_pdf:
+        result = runner.invoke(app, ["render", "--resume", str(variant), "--output", str(output)])
+    assert result.exit_code == 0
+    mock_pdf.assert_called_once()
 
 
 def _make_playwright_mock(tmp_path: Path) -> MagicMock:
@@ -90,11 +113,18 @@ def test_init_creates_default_files(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     result = runner.invoke(app, ["init"])
     assert result.exit_code == 0
     assert (tmp_path / "resume.yml").exists()
-    assert (tmp_path / "template.html").exists()
-    assert (tmp_path / "style.css").exists()
+    assert (tmp_path / "template" / "resume.j2.html").exists()
+    assert (tmp_path / "template" / "head.j2.html").exists()
+    assert (tmp_path / "template" / "style.css").exists()
+    assert (tmp_path / "tailored").is_dir()
+    assert (tmp_path / "AGENTS.md").exists()
+    assert (tmp_path / ".gitignore").exists()
+    assert (tmp_path / "CLAUDE.md").is_symlink()
+    assert (tmp_path / "CLAUDE.md").resolve() == (tmp_path / "AGENTS.md").resolve()
     assert "Created resume.yml" in result.output
-    assert "Created template.html" in result.output
-    assert "Created style.css" in result.output
+    assert "Created template/resume.j2.html" in result.output
+    assert "Created AGENTS.md" in result.output
+    assert "Created CLAUDE.md -> AGENTS.md" in result.output
 
 
 def test_init_skips_existing_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

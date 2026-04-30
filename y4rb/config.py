@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
-import yaml
 from pydantic import BaseModel
 
 
@@ -11,48 +9,44 @@ class Config(BaseModel):
     resume: Path
     template: Path
     style: Path | None = None
-    preview: bool = True
+    head: Path | None = None
 
 
-def resolve_config(directory: Path | None = None) -> Config:
+def resolve_config(
+    directory: Path | None = None,
+    resume_file: Path | None = None,
+) -> Config:
     base = directory.resolve() if directory is not None else Path.cwd()
-    raw = _load_raw_config(base)
 
-    resume = _require(
-        raw.get("resume"),
-        ["resume.yaml", "resume.yml"],
-        "resume data file",
-        base,
-    )
+    if resume_file is not None:
+        p = (base / resume_file).resolve()
+        if not p.exists():
+            raise FileNotFoundError(f"File not found: {p}")
+        resume = p
+    else:
+        resume = _require(
+            ["resume.yaml", "resume.yml"],
+            "resume data file",
+            base,
+        )
+
     template = _require(
-        raw.get("template"),
-        ["template.html", "template.j2.html"],
+        [
+            "template/resume.j2.html",
+            "template/template.html",
+            "template.j2.html",
+            "template.html",
+        ],
         "template file",
         base,
     )
-    style = _optional(raw.get("style"), ["style.css"], base)
-    preview = bool(raw.get("preview", True))
+    style = _optional(["template/style.css", "style.css"], base)
+    head = _optional(["template/head.j2.html"], base)
 
-    return Config(resume=resume, template=template, style=style, preview=preview)
-
-
-def _load_raw_config(base: Path) -> dict[str, Any]:
-    for name in ("y4rb.yaml", "y4rb.yml"):
-        path = base / name
-        if path.exists():
-            data = yaml.safe_load(path.read_text())
-            return data if isinstance(data, dict) else {}
-
-    return {}
+    return Config(resume=resume, template=template, style=style, head=head)
 
 
-def _require(explicit: str | None, defaults: list[str], label: str, base: Path) -> Path:
-    if explicit is not None:
-        p = (base / explicit).resolve()
-        if not p.exists():
-            raise FileNotFoundError(f"File not found: {p}")
-        return p
-
+def _require(defaults: list[str], label: str, base: Path) -> Path:
     for name in defaults:
         p = base / name
         if p.exists():
@@ -62,11 +56,7 @@ def _require(explicit: str | None, defaults: list[str], label: str, base: Path) 
     raise FileNotFoundError(f"Could not find {label}: tried {tried}")
 
 
-def _optional(explicit: str | None, defaults: list[str], base: Path) -> Path | None:
-    if explicit is not None:
-        p = (base / explicit).resolve()
-        return p if p.exists() else None
-
+def _optional(defaults: list[str], base: Path) -> Path | None:
     for name in defaults:
         p = base / name
         if p.exists():

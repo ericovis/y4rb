@@ -46,11 +46,14 @@ def test_binary_init(built_binary: Path, tmp_path: Path) -> None:
     )
     assert result.returncode == 0
     assert (tmp_path / "resume.yml").exists()
-    assert (tmp_path / "template.html").exists()
-    assert (tmp_path / "style.css").exists()
+    assert (tmp_path / "template" / "resume.j2.html").exists()
+    assert (tmp_path / "template" / "style.css").exists()
+    assert (tmp_path / "template" / "head.j2.html").exists()
+    assert (tmp_path / "tailored").is_dir()
+    assert (tmp_path / "AGENTS.md").exists()
+    assert (tmp_path / "CLAUDE.md").is_symlink()
     assert "Created resume.yml" in result.stdout
-    assert "Created template.html" in result.stdout
-    assert "Created style.css" in result.stdout
+    assert "Created template/resume.j2.html" in result.stdout
 
 
 def test_binary_render(built_binary: Path, tmp_path: Path) -> None:

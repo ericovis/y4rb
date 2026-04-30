@@ -3,11 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}{{ resume.name }} — Resumé{% endblock %}</title>
+  {% include "head.j2.html" %}
   {% if style %}<style>{{ style | safe }}</style>{% endif %}
-  {% block head %}{% endblock %}
   {% if preview %}
   <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
   <style data-pagedjs-ignore>
     body {
       margin: 0;

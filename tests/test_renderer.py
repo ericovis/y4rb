@@ -37,12 +37,11 @@ def test_no_style_tag_without_css(resume_file: Path, template_file: Path) -> Non
     assert "<style>" not in html
 
 
-def test_extends_base_with_head_block(resume_file: Path, tmp_path: Path) -> None:
-    template = tmp_path / "template.html"
-    template.write_text(
-        '{% block head %}<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter">{% endblock %}'
-        "{% block content %}<p>{{ resume.name }}</p>{% endblock %}"
-    )
+def test_head_file_overrides_default_head(resume_file: Path, tmp_path: Path) -> None:
+    template = tmp_path / "resume.j2.html"
+    template.write_text("{% block content %}<p>{{ resume.name }}</p>{% endblock %}")
+    head = tmp_path / "head.j2.html"
+    head.write_text('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter">')
     html = render(resume_file, template)
     assert "<!DOCTYPE html>" in html
     assert "fonts.googleapis.com" in html
