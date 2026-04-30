@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tempfile
 from pathlib import Path
@@ -48,9 +48,9 @@ def _ensure_chromium(chromium: BrowserType) -> None:
             from playwright._impl._driver import compute_driver_executable
 
             driver_executable, driver_cli = compute_driver_executable()
-            subprocess.run([str(driver_executable), driver_cli, "install", "chromium"], check=True)
+            subprocess.run([str(driver_executable), driver_cli, "install", "chromium"], check=True)  # nosec B603
         else:
-            subprocess.run(
+            subprocess.run(  # nosec B603
                 [sys.executable, "-m", "playwright", "install", "chromium"],
                 check=True,
             )
