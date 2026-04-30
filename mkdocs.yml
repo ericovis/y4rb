@@ -27,4 +27,6 @@ extra:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Styling: styling.md
+  - Working with Claude Code: agents.md
   - CLI Reference: cli-reference.md

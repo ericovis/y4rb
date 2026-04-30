@@ -1,4 +1,4 @@
-# y4rb
+# y4rb — Yet Another Resumé Builder
 
 **y4rb** is a resume builder that turns a YAML file and an HTML/CSS template into a polished PDF. You own the design — y4rb just connects the data to the template and handles rendering.
 
