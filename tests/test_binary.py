@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -9,24 +10,12 @@ _PROJECT_ROOT = Path(__file__).parent.parent
 
 
 @pytest.fixture(scope="session")
-def built_binary(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    dist_dir = tmp_path_factory.mktemp("dist")
-    work_dir = tmp_path_factory.mktemp("work")
-    subprocess.run(
-        [
-            str(_PROJECT_ROOT / "bin" / "run"),
-            "pyinstaller",
-            "y4rb.spec",
-            "--noconfirm",
-            "--distpath",
-            str(dist_dir),
-            "--workpath",
-            str(work_dir),
-        ],
-        check=True,
-        cwd=_PROJECT_ROOT,
-    )
-    return dist_dir / "y4rb"
+def built_binary() -> Path:
+    build_script = _PROJECT_ROOT / "bin" / "build"
+    cmd = ["bash", str(build_script)] if sys.platform == "win32" else [str(build_script)]
+    subprocess.run(cmd, check=True, cwd=_PROJECT_ROOT)
+    name = "y4rb.exe" if sys.platform == "win32" else "y4rb"
+    return _PROJECT_ROOT / "dist" / name
 
 
 def test_binary_help(built_binary: Path) -> None:

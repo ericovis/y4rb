@@ -1,0 +1,30 @@
+site_name: y4rb
+site_description: Yet Another Resumé Builder
+site_url: https://y4rb.org
+repo_url: https://github.com/ericovis/y4rb
+repo_name: ericovis/y4rb
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
+
+extra:
+  version:
+    provider: mike
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - CLI Reference: cli-reference.md

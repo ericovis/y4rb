@@ -1,0 +1,198 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag matches pyproject.toml version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          TOML_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "//;s/"//')
+          if [ "$TAG_VERSION" != "$TOML_VERSION" ]; then
+            echo "Error: tag $GITHUB_REF_NAME does not match pyproject.toml version $TOML_VERSION"
+            exit 1
+          fi
+          echo "Version $TAG_VERSION verified"
+
+  build:
+    needs: check-version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            spec: specs/linux.spec
+            artifact_name: y4rb-linux-x86_64
+            dist_binary: dist/y4rb
+
+          - os: ubuntu-24.04-arm
+            spec: specs/linux.spec
+            artifact_name: y4rb-linux-arm64
+            dist_binary: dist/y4rb
+
+          - os: macos-latest
+            spec: specs/macos-arm.spec
+            artifact_name: y4rb-macos-arm64
+            dist_binary: dist/y4rb
+
+          - os: macos-13
+            spec: specs/macos-intel.spec
+            artifact_name: y4rb-macos-x86_64
+            dist_binary: dist/y4rb
+
+          - os: windows-latest
+            spec: specs/windows.spec
+            artifact_name: y4rb-windows-x86_64.exe
+            dist_binary: dist/y4rb.exe
+
+          - os: windows-11-arm
+            spec: specs/windows.spec
+            artifact_name: y4rb-windows-arm64.exe
+            dist_binary: dist/y4rb.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Build binary
+        shell: bash
+        run: uv run pyinstaller ${{ matrix.spec }} --noconfirm
+
+      - name: Rename binary
+        shell: bash
+        run: mv ${{ matrix.dist_binary }} dist/${{ matrix.artifact_name }}
+
+      - name: Compute SHA256
+        shell: bash
+        run: |
+          cd dist
+          if command -v sha256sum > /dev/null 2>&1; then
+            sha256sum ${{ matrix.artifact_name }} > ${{ matrix.artifact_name }}.sha256
+          else
+            shasum -a 256 ${{ matrix.artifact_name }} > ${{ matrix.artifact_name }}.sha256
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            dist/${{ matrix.artifact_name }}
+            dist/${{ matrix.artifact_name }}.sha256
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Collect checksums
+        run: cat dist/*.sha256 > checksums.sha256
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/y4rb-*
+            checksums.sha256
+
+  publish-pypi:
+    needs: create-release
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Build package
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  docs:
+    needs: create-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Install docs dependencies
+        run: uv sync --group docs
+
+      - name: Build docs
+        run: uv run mkdocs build --site-dir site/
+
+      - name: Deploy to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET: ${{ secrets.S3_DOCS_BUCKET }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          # Upload versioned copy
+          aws s3 sync site/ "s3://$S3_BUCKET/$VERSION/" --delete
+
+          # Update latest alias
+          aws s3 sync site/ "s3://$S3_BUCKET/latest/" --delete
+
+          # Download current versions.json or seed an empty one
+          aws s3 cp "s3://$S3_BUCKET/versions.json" versions.json 2>/dev/null || echo "[]" > versions.json
+
+          # Prepend new version, move "latest" alias to it
+          python3 - "$VERSION" <<'EOF'
+          import json, sys
+
+          version = sys.argv[1]
+          with open("versions.json") as f:
+              versions = json.load(f)
+
+          for v in versions:
+              v["aliases"] = [a for a in v.get("aliases", []) if a != "latest"]
+
+          versions.insert(0, {"version": version, "title": version, "aliases": ["latest"]})
+
+          with open("versions.json", "w") as f:
+              json.dump(versions, f, indent=2)
+          EOF
+
+          aws s3 cp versions.json "s3://$S3_BUCKET/versions.json"
+
+          # Root redirect to /latest/
+          cat > index.html << 'HTML'
+          <!DOCTYPE html>
+          <html><head><meta http-equiv="refresh" content="0;url=latest/"></head></html>
+          HTML
+          aws s3 cp index.html "s3://$S3_BUCKET/index.html"
