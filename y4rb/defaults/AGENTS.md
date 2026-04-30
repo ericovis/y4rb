@@ -81,6 +81,49 @@ y4rb render --resume tailored/acme-corp-backend.yml --output acme-corp.pdf
 y4rb preview --dir /path/to/project
 ```
 
+## Style Authoring Guidelines
+
+All resume content is wrapped in `<div id="resume">`. This is the correct target for any styles that would normally go on `body` or `html`.
+
+**Rules:**
+- Never use `body { ... }` or `html { ... }` as selectors — they are automatically stripped at render time and a warning is issued
+- Use `#resume { ... }` for document-level typography (font, size, line-height, color)
+- **Background color belongs in `@page { ... }`, not on `#resume` or any element selector**
+- Use specific element or class selectors for everything else
+
+**Why:** In preview mode, pagedjs takes over `<body>` and injects its own class structure. Styles on `body` escape the page boundary and break the preview layout. `#resume` exists in both preview and PDF output, so it is always safe. Background color set on an element (even `#resume`) bleeds into the outer chrome in preview mode — pagedjs reads `@page` to style the page sheet, which is the correct and consistent target for both preview and PDF.
+
+**Example — correct:**
+```css
+@page {
+  size: A4;
+  margin: 1cm;
+  background-color: #fff;  /* page background goes here */
+}
+
+#resume {
+  font-family: "Georgia", serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  /* no background-color here */
+}
+```
+
+**Example — will cause preview/PDF mismatch:**
+```css
+#resume {
+  background-color: #fff; /* wrong — use @page instead */
+}
+```
+
+**Example — will be stripped with a warning:**
+```css
+body {
+  font-family: "Georgia", serif; /* ignored */
+}
+```
+
 ## Template Customization
 
 - **Layout:** edit `template/resume.j2.html` — it's a [Jinja2](https://jinja.palletsprojects.com/) template; resume data is available as `{{ resume.field }}`

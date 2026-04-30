@@ -1,13 +1,14 @@
 @page {
     size: A4;
     margin: 1cm;
+    background-color: #fff;
 }
 
 @page:first {
     margin-top: 2cm;
 }
 
-body {
+#resume {
   font-family: "Georgia", serif;
   font-size: 14px;
   line-height: 1.5;
