@@ -30,12 +30,25 @@ def test_config_file_overrides_defaults(config_dir: Path) -> None:
     assert cfg.template == (config_dir / "template.html").resolve()
 
 
-def test_explicit_config_path(config_dir: Path) -> None:
-    config_file = config_dir / "custom.yaml"
-    config_file.write_text("resume: resume.yml\ntemplate: template.html\n")
-    cfg = resolve_config(config_file)
-    assert cfg.resume == (config_dir / "resume.yml").resolve()
-    assert cfg.template == (config_dir / "template.html").resolve()
+def test_explicit_directory(config_dir: Path, tmp_path: Path) -> None:
+    resume_dir = tmp_path / "myresume"
+    resume_dir.mkdir()
+    (resume_dir / "resume.yml").write_bytes((config_dir / "resume.yml").read_bytes())
+    (resume_dir / "template.html").write_bytes((config_dir / "template.html").read_bytes())
+    cfg = resolve_config(resume_dir)
+    assert cfg.resume == (resume_dir / "resume.yml").resolve()
+    assert cfg.template == (resume_dir / "template.html").resolve()
+
+
+def test_explicit_directory_picks_up_config_file(config_dir: Path, tmp_path: Path) -> None:
+    resume_dir = tmp_path / "myresume"
+    resume_dir.mkdir()
+    (resume_dir / "resume.yml").write_bytes((config_dir / "resume.yml").read_bytes())
+    (resume_dir / "template.html").write_bytes((config_dir / "template.html").read_bytes())
+    (resume_dir / "y4rb.yaml").write_text("resume: resume.yml\ntemplate: template.html\n")
+    cfg = resolve_config(resume_dir)
+    assert cfg.resume == (resume_dir / "resume.yml").resolve()
+    assert cfg.template == (resume_dir / "template.html").resolve()
 
 
 def test_raises_when_resume_missing(config_dir: Path) -> None:

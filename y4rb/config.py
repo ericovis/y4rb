@@ -14,32 +14,31 @@ class Config(BaseModel):
     preview: bool = True
 
 
-def resolve_config(config_path: Path | None = None) -> Config:
-    raw = _load_raw_config(config_path)
+def resolve_config(directory: Path | None = None) -> Config:
+    base = directory.resolve() if directory is not None else Path.cwd()
+    raw = _load_raw_config(base)
 
     resume = _require(
         raw.get("resume"),
         ["resume.yaml", "resume.yml"],
         "resume data file",
+        base,
     )
     template = _require(
         raw.get("template"),
         ["template.html", "template.j2.html"],
         "template file",
+        base,
     )
-    style = _optional(raw.get("style"), ["style.css"])
+    style = _optional(raw.get("style"), ["style.css"], base)
     preview = bool(raw.get("preview", True))
 
     return Config(resume=resume, template=template, style=style, preview=preview)
 
 
-def _load_raw_config(config_path: Path | None) -> dict[str, Any]:
-    if config_path is not None:
-        data = yaml.safe_load(config_path.read_text())
-        return data if isinstance(data, dict) else {}
-
+def _load_raw_config(base: Path) -> dict[str, Any]:
     for name in ("y4rb.yaml", "y4rb.yml"):
-        path = Path(name)
+        path = base / name
         if path.exists():
             data = yaml.safe_load(path.read_text())
             return data if isinstance(data, dict) else {}
@@ -47,15 +46,15 @@ def _load_raw_config(config_path: Path | None) -> dict[str, Any]:
     return {}
 
 
-def _require(explicit: str | None, defaults: list[str], label: str) -> Path:
+def _require(explicit: str | None, defaults: list[str], label: str, base: Path) -> Path:
     if explicit is not None:
-        p = Path(explicit).resolve()
+        p = (base / explicit).resolve()
         if not p.exists():
             raise FileNotFoundError(f"File not found: {p}")
         return p
 
     for name in defaults:
-        p = Path(name)
+        p = base / name
         if p.exists():
             return p.resolve()
 
@@ -63,13 +62,13 @@ def _require(explicit: str | None, defaults: list[str], label: str) -> Path:
     raise FileNotFoundError(f"Could not find {label}: tried {tried}")
 
 
-def _optional(explicit: str | None, defaults: list[str]) -> Path | None:
+def _optional(explicit: str | None, defaults: list[str], base: Path) -> Path | None:
     if explicit is not None:
-        p = Path(explicit).resolve()
+        p = (base / explicit).resolve()
         return p if p.exists() else None
 
     for name in defaults:
-        p = Path(name)
+        p = base / name
         if p.exists():
             return p.resolve()
 

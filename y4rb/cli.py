@@ -15,10 +15,15 @@ _DEFAULT_FILES = ("resume.yml", "template.html", "style.css")
 
 
 @app.command()
-def init() -> None:
-    """Initialize a new resume project in the current directory."""
+def init(
+    directory: Path = typer.Argument(
+        Path("."), help="Directory to initialize (default: current directory)"
+    ),
+) -> None:
+    """Initialize a new resume project in the given directory."""
+    directory.mkdir(parents=True, exist_ok=True)
     for name in _DEFAULT_FILES:
-        dest = Path(name)
+        dest = directory / name
         if dest.exists():
             typer.echo(f"Skipping {name} (already exists)")
             continue
@@ -28,8 +33,8 @@ def init() -> None:
 
 @app.command()
 def render(
-    config: Path | None = typer.Option(
-        None, "--config", "-c", help="Path to y4rb config file (default: y4rb.yaml/yml)"
+    directory: Path | None = typer.Option(
+        None, "--dir", "-d", help="Directory containing resume files (default: current directory)"
     ),
     output: Path = typer.Option(
         Path("resume.pdf"), "--output", "-o", help="Output PDF path"
@@ -37,7 +42,7 @@ def render(
 ) -> None:
     """Render the resume to a PDF file."""
     try:
-        cfg = resolve_config(config)
+        cfg = resolve_config(directory)
     except FileNotFoundError as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1)
@@ -50,15 +55,15 @@ def render(
 
 @app.command()
 def preview(
-    config: Path | None = typer.Option(
-        None, "--config", "-c", help="Path to y4rb config file (default: y4rb.yaml/yml)"
+    directory: Path | None = typer.Option(
+        None, "--dir", "-d", help="Directory containing resume files (default: current directory)"
     ),
     port: int = typer.Option(8080, "--port", "-p", help="Port to serve on"),
     host: str = typer.Option("127.0.0.1", "--host", help="Host to bind to"),
 ) -> None:
     """Preview the resume locally with live reload."""
     try:
-        cfg = resolve_config(config)
+        cfg = resolve_config(directory)
     except FileNotFoundError as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1)
